@@ -2,12 +2,14 @@
     'use strict';
 
     angular
-        .module('app', ['ngRoute', 'ngCookies'])
+        .module('app', ['ngRoute', 'ngCookies', 'ngResource'])    
         .config(config)
         .run(run);
+        
+    config.$inject = ['$routeProvider', '$locationProvider', '$httpProvider'];
+    function config($routeProvider, $locationProvider, $httpProvider) {
 
-    config.$inject = ['$routeProvider', '$locationProvider'];
-    function config($routeProvider, $locationProvider) {
+
         $routeProvider
             .when('/', {
                 controller: 'HomeController',

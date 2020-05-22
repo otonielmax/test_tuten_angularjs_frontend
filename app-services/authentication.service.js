@@ -3,15 +3,17 @@
 
     angular
         .module('app')
-        .factory('AuthenticationService', AuthenticationService);
+        .factory('AuthenticationService', AuthenticationService)        
 
-    AuthenticationService.$inject = ['$http', '$cookies', '$rootScope', '$timeout', 'UserService'];
-    function AuthenticationService($http, $cookies, $rootScope, $timeout, UserService) {
+    AuthenticationService.$inject = ['$http', '$cookies', '$rootScope', '$timeout', 'UserService', '$resource'];
+    function AuthenticationService($http, $cookies, $rootScope, $timeout, UserService, $resource) {
         var service = {};
 
         service.Login = Login;
         service.SetCredentials = SetCredentials;
         service.ClearCredentials = ClearCredentials;
+
+        const URL = "https://dev.tuten.cl:443/TutenREST/rest/";
 
         return service;
 
@@ -19,6 +21,7 @@
 
             /* Dummy authentication for testing, uses $timeout to simulate api call
              ----------------------------------------------*/
+            /*
             $timeout(function () {
                 var response;
                 UserService.GetByUsername(username)
@@ -31,14 +34,46 @@
                         callback(response);
                     });
             }, 1000);
-
+            */
             /* Use this for real authentication
              ----------------------------------------------*/
-            //$http.post('/api/authenticate', { username: username, password: password })
-            //    .success(function (response) {
-            //        callback(response);
-            //    });
-
+            //$http.defaults.headers.common.Authorization = 'Basic YmVlcDpib29w';
+            $http.put(
+                URL + 'user/' + username, 
+                { 
+                  
+                },
+                {
+                    headers: {                
+                        'Accept': 'application/json',
+                        'App': 'APP_BCK',
+                        'Password': password
+                    }
+                })
+                .then(function (response) {
+                    callback(response);
+                });
+            /*
+            var apiRest = $resource(URL + 'user/:email');
+            apiRest.put({email : username}).$promise
+            .then(function (response) {
+                callback(response);
+            });
+            /*
+            $http({ 
+                url: URL + 'user/' + username, 
+                method: "POST", 
+                data: { 
+                    email: username, 
+                    password: password,
+                    app: 'APP_BCK'
+                }
+            })
+            .then(function (response) {
+                callback(response);
+            });
+            */
+            
         }
 
         function SetCredentials(username, password) {
@@ -65,7 +100,7 @@
             $cookies.remove('globals');
             $http.defaults.headers.common.Authorization = 'Basic';
         }
-    }
+    }    
 
     // Base64 encoding service used by AuthenticationService
     var Base64 = {
